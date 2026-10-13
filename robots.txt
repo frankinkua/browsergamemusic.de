@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://browsergamemusic.de/sitemap.xml
