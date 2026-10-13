@@ -1,1 +1,206 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Work in Progress</title></head><body style="font-family:system-ui;display:grid;place-items:center;min-height:100vh;margin:0"><h1>browsergamemusic.de</h1></body></html>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Browser Game Music | Chiptune Sequencer & VGM Wissen</title>
+    <meta name="description" content="Erstelle eigene Chiptune-Loops in deinem Browser! Lerne mehr über Videospielmusik, adaptiven Sound und wie legendäre Soundtracks entstehen.">
+    <meta property="og:title" content="Browser Game Music | Chiptune Sequencer">
+    <meta property="og:description" content="Erstelle eigene Chiptune-Loops direkt im Browser und teile sie mit Freunden.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://browsergamemusic.de/">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .sequencer-container {
+            background-color: var(--surface-color);
+            border: 4px solid var(--border-color);
+            padding: 20px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-family: var(--font-heading);
+            font-size: 0.8rem;
+            color: var(--accent-cyan);
+        }
+
+        input[type="range"], select {
+            background: var(--bg-color);
+            border: 2px solid var(--accent-cyan);
+            color: var(--text-color);
+            padding: 5px;
+            font-family: var(--font-body);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: auto repeat(16, 1fr);
+            gap: 4px;
+            min-width: 600px;
+        }
+
+        .row-label {
+            display: flex;
+            align-items: center;
+            font-family: var(--font-heading);
+            font-size: 0.7rem;
+            color: var(--accent-pink);
+            padding-right: 10px;
+            justify-content: flex-end;
+        }
+
+        .step {
+            width: 100%;
+            aspect-ratio: 1;
+            background-color: var(--bg-color);
+            border: 2px solid #333;
+            cursor: pointer;
+            transition: background-color 0.1s;
+        }
+
+        .step:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .step.active {
+            background-color: var(--accent-pink);
+            border-color: var(--accent-pink);
+        }
+
+        .step.current {
+            border-color: var(--text-color);
+            box-shadow: 0 0 10px var(--text-color);
+        }
+
+        .share-container {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .share-input {
+            flex-grow: 1;
+            background: var(--bg-color);
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            padding: 10px;
+            font-family: monospace;
+        }
+
+        .article-content {
+            line-height: 1.8;
+            margin-top: 4rem;
+        }
+
+        .article-content h2 {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .article-content p {
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body class="crt crt-flicker">
+    <div class="container">
+        <header>
+            <h1>Browser Game Music</h1>
+            <p style="font-family: var(--font-heading); font-size: 0.8rem; color: var(--text-color);">Chiptune Sequencer & VGM Wissen</p>
+        </header>
+
+        <main>
+            <section aria-labelledby="sequencer-heading">
+                <h2 id="sequencer-heading">Dein Sequencer</h2>
+                <div class="sequencer-container">
+                    <div class="controls">
+                        <button id="play-btn" class="button" aria-label="Play oder Pause">Play</button>
+                        <button id="clear-btn" class="button" aria-label="Pattern leeren" style="border-color: var(--accent-pink); color: var(--accent-pink);">Clear</button>
+
+                        <div class="control-group">
+                            <label for="tempo">BPM:</label>
+                            <input type="range" id="tempo" min="60" max="200" value="120" aria-label="Tempo in Beats per Minute">
+                            <span id="tempo-val" style="font-family: var(--font-heading); font-size: 0.8rem;">120</span>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="scale">Skala:</label>
+                            <select id="scale" aria-label="Tonleiter auswählen">
+                                <option value="minor_pentatonic">Moll Pentatonisch</option>
+                                <option value="major">Dur</option>
+                                <option value="minor">Moll</option>
+                                <option value="blues">Blues</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid" id="sequencer-grid" role="grid" aria-label="16-Step Sequencer Grid">
+                        <!-- Generiert durch app.js -->
+                    </div>
+
+                    <div class="share-container">
+                        <input type="text" id="share-url" class="share-input" readonly aria-label="Teilbarer Link">
+                        <button id="copy-btn" class="button" style="padding: 10px;">Link kopieren</button>
+                    </div>
+                </div>
+            </section>
+
+            <article class="article-content" aria-labelledby="article-heading">
+                <h2 id="article-heading">Die Magie der Videospielmusik (VGM)</h2>
+
+                <p>Videospielmusik ist weit mehr als nur ein akustischer Hintergrund. Sie ist ein essenzieller Bestandteil der Immersion, ein emotionaler Anker und ein subtiles Feedback-System für den Spieler. Von den Pieptönen der Arcade-Automaten bis hin zu den orchestralen Meisterwerken moderner Blockbuster hat sich die "Video Game Music" (VGM) zu einer eigenständigen Kunstform entwickelt, die Millionen von Fans weltweit fasziniert.</p>
+
+                <h3>Die Anfänge: Chiptunes und technische Limitierungen</h3>
+                <p>In den frühen Tagen der Videospiele, etwa in den 1970er und 1980er Jahren, waren Komponisten mit extremen Hardware-Limitierungen konfrontiert. Konsolen wie das NES (Nintendo Entertainment System) oder der Commodore 64 hatten Soundchips (wie den legendären SID-Chip), die nur wenige gleichzeitig abspielbare Stimmen – oft drei bis vier Kanäle – zuließen. Diese Kanäle wurden meist für einfache Wellenformen (Rechteck, Dreieck, Sägezahn) und Rauschen (für Percussion) genutzt.</p>
+
+                <p>Aus dieser Not heraus entstand das Genre der <strong>Chiptunes</strong>. Komponisten wie Koji Kondo (Super Mario Bros., The Legend of Zelda) oder Nobuo Uematsu (Final Fantasy) mussten extrem kreative Melodien schreiben, die trotz der begrenzten Polyphonie im Gedächtnis blieben. Arpeggios wurden genutzt, um Akkorde zu simulieren, und kurze, prägnante Loops wurden so arrangiert, dass sie stundenlang laufen konnten, ohne den Spieler in den Wahnsinn zu treiben. Genau dieses Gefühl kannst du mit dem Sequencer oben selbst ausprobieren!</p>
+
+                <h3>Der Loop: Die Kunst der nahtlosen Wiederholung</h3>
+                <p>Eine der größten Herausforderungen in der Komposition von Videospielmusik ist der <strong>Loop</strong>. Im Gegensatz zu Filmen, bei denen eine Szene eine feste Dauer hat, weiß der Komponist eines Videospiels nie, wie lange ein Spieler in einem bestimmten Level oder Menü verweilen wird. Die Musik muss also endlos schleifen (loopen) können.</p>
+
+                <p>Ein perfekter Loop ist eine Kunst für sich. Der Übergang vom Ende des Tracks zurück zum Anfang muss so organisch und unmerklich wie möglich gestaltet sein. Gleichzeitig muss die Komposition genügend Variation aufweisen, um nicht nach zwei Minuten repetitiv und nervig zu wirken. Oft werden dafür komplexe A-B-A-C Strukturen genutzt, bei denen bestimmte Motive variiert zurückkehren.</p>
+
+                <h3>Adaptive Musik: Der Soundtrack, der mitspielt</h3>
+                <p>Mit der Weiterentwicklung der Technologie entstand in den 1990er Jahren ein neues Paradigma: <strong>Adaptive oder Interaktive Musik</strong>. Das bedeutet, dass sich der Soundtrack in Echtzeit an das Spielgeschehen anpasst. Wenn du durch einen ruhigen Wald läufst, spielt eine sanfte Melodie. Sobald ein Feind auftaucht, wechseln Tempo und Instrumentierung fließend zu einem bedrohlichen Kampf-Thema, ohne dass das Lied komplett neu gestartet wird.</p>
+
+                <p>Techniken dafür umfassen das <em>vertikale Layering</em> (verschiedene Instrumentenspuren laufen synchron und werden je nach Situation ein- oder ausgeblendet) und das <em>horizontale Re-Sequencing</em> (die Musik besteht aus kurzen Blöcken, die von der Game-Engine logisch aneinandergereiht werden). Ein frühes, brillantes Beispiel dafür ist das iMUSE-System von LucasArts, das in Spielen wie "Monkey Island 2" eingesetzt wurde.</p>
+
+                <h3>Warum VGM uns so berührt</h3>
+                <p>Die starke emotionale Bindung, die viele Menschen zu Videospielmusik haben, ist kein Zufall. Psychologen erklären dies oft mit der interaktiven Natur des Mediums. Wenn wir ein Spiel spielen, sind wir nicht nur passive Beobachter (wie beim Film), sondern aktive Teilnehmer. Die Musik wird mit unseren eigenen Handlungen, Erfolgen und Frustrationen verknüpft. Ein Boss-Theme weckt echte Anspannung, während die Melodie eines Speicherraums (wie in Resident Evil) echte Erleichterung auslöst.</p>
+
+                <p>Heute ist VGM längst im Mainstream angekommen. Komponisten touren mit Symphonieorchestern um die Welt und füllen riesige Konzerthallen, in denen Fans die Soundtracks ihrer Kindheit und aktueller Spiele feiern. Dennoch bleibt der Charme der einfachen, 8-Bit-basierten Chiptunes ungebrochen – wie der Sequencer auf dieser Seite beweist.</p>
+            </article>
+        </main>
+
+        <footer>
+            <nav aria-label="Footer Navigation">
+                <a href="index.html">Home</a>
+                <a href="impressum.html">Impressum</a>
+                <a href="datenschutz.html">Datenschutz</a>
+            </nav>
+            <p>&copy; 2023 Browser Game Music</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
